@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Bilal",
+        "age": 23,
+        "grade": "A"
+    },
+    {
+        "name": "Zain",
+        "age": 21,
+        "grade": "A+"
+    },
+    {
+        "name": "Usman",
+        "age": 22,
+        "grade": "B"
+    },
+    {
+        "name": "Malaika",
+        "age": 19,
+        "grade": "B+"
+    },
+    {
+        "name": "Safura",
+        "age": 20,
+        "grade": "A"
+    }
+]

@@ -1,0 +1,97 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "0ceec880-058f-40eb-87fa-4a18c749b2bf",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "student_records.json created!\n"
+     ]
+    }
+   ],
+   "source": [
+    "import json\n",
+    "\n",
+    "students = [\n",
+    "    {\"name\": \"Aimen\", \"age\": 20, \"grade\": \"A\"},\n",
+    "    {\"name\": \"Ahmed\", \"age\": 22, \"grade\": \"B+\"},\n",
+    "    {\"name\": \"Maryam\", \"age\": 21, \"grade\": \"A+\"}\n",
+    "]\n",
+    "\n",
+    "with open(\"student_records.json\", \"w\") as f:\n",
+    "    json.dump(students, f, indent=4)\n",
+    "\n",
+    "print(\"student_records.json created!\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "71342865-c738-4430-a6d4-243f3eec0425",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[\n",
+      "    {\n",
+      "        \"name\": \"Aimen\",\n",
+      "        \"age\": 20,\n",
+      "        \"grade\": \"A\"\n",
+      "    },\n",
+      "    {\n",
+      "        \"name\": \"Ahmed\",\n",
+      "        \"age\": 22,\n",
+      "        \"grade\": \"B+\"\n",
+      "    },\n",
+      "    {\n",
+      "        \"name\": \"Maryam\",\n",
+      "        \"age\": 21,\n",
+      "        \"grade\": \"A+\"\n",
+      "    }\n",
+      "]\n"
+     ]
+    }
+   ],
+   "source": [
+    "with open(\"student_records.json\", \"r\") as f:\n",
+    "    print(f.read())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "baa48552-1829-4774-9694-56259cb301cb",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
