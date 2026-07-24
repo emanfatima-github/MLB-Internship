@@ -4,9 +4,18 @@ import cv2
 import numpy as np
 from PIL import Image
 
-reader = easyocr.Reader(['en'], gpu=False)
+import os
 
-st.title("📄 OCR Document Reader")
+MODEL_DIR = "models"
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+reader = easyocr.Reader(
+    ['en'],
+    gpu=False,
+    model_storage_directory=MODEL_DIR
+)
+
+st.title("OCR Document Reader")
 
 uploaded_file = st.file_uploader(
     "Upload an Image",

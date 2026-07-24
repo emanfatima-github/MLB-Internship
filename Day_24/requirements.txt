@@ -1,8 +1,7 @@
 streamlit
-easyocr
+easyocr==1.7.2
+torch
+torchvision
 opencv-python-headless
 numpy
 Pillow
-torch
-torchvision
-matplotlib
