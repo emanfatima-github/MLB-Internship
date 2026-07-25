@@ -8,7 +8,7 @@ torch.set_num_threads(1)
 st.set_page_config(page_title="Simple OCR Document Reader",page_icon="📄",layout="centered")
 st.title(" Simple OCR Document Reader")
 st.write("Upload a document image to extract visible text using EasyOCR.")
-MODEL_DIR = "/tmp/easyocr_models"
+MODEL_DIR = os.path.join(os.path.dirname(__file__), "easyocr_models")
 os.makedirs(MODEL_DIR, exist_ok=True)
 @st.cache_resource(show_spinner=False)
 def get_ocr_reader():
