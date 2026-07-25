@@ -69,7 +69,7 @@ if uploaded_file is not None:
     with col1:
         st.subheader("Original Image")
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        st.image(image_rgb, use_container_width=True)
+        st.image(image_rgb, caption="Original Image")
 
     # OCR
     with col2:
