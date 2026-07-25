@@ -1,56 +1,62 @@
 import streamlit as st
-import easyocr
-import cv2
-import numpy as np
 from PIL import Image
-
+import tempfile
 import os
 
-MODEL_DIR = "models"
-os.makedirs(MODEL_DIR, exist_ok=True)
+from ocr import extract_text
 
-reader = easyocr.Reader(
-    ['en'],
-    gpu=False,
-    model_storage_directory=MODEL_DIR
+st.set_page_config(
+    page_title="Simple OCR Document Reader",
+    page_icon="📄",
+    layout="wide"
 )
 
-st.title("OCR Document Reader")
+st.title("Simple OCR Document Reader")
 
 uploaded_file = st.file_uploader(
-    "Upload an Image",
-    type=["jpg","jpeg","png"]
+    "Upload an image",
+    type=["png", "jpg", "jpeg"]
 )
 
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file)
 
-    image_np = np.array(image)
+    col1, col2 = st.columns(2)
 
-    gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+    with col1:
+        st.image(image, caption="Original Image", use_container_width=True)
 
-    gray = cv2.equalizeHist(gray)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+        image.save(tmp.name)
+        image_path = tmp.name
 
-    result = reader.readtext(gray)
+    with st.spinner("Extracting text..."):
+        text = extract_text(image_path)
 
-    extracted_text = ""
+    os.makedirs("outputs", exist_ok=True)
 
-    for item in result:
-        extracted_text += item[1] + "\n"
+    output_file = "outputs/extracted_text.txt"
 
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(text)
 
-    st.subheader("Extracted Text")
+    with col2:
+        st.subheader("Extracted Text")
 
-    st.text_area(
-        "",
-        extracted_text,
-        height=250
-    )
+        if text.strip() == "":
+            st.warning("No text detected.")
+        else:
+            st.text_area(
+                "",
+                text,
+                height=400
+            )
 
-    st.download_button(
-        "Download Text",
-        extracted_text,
-        file_name="output.txt"
-    )
+            st.download_button(
+                "Download TXT",
+                text,
+                file_name="extracted_text.txt"
+            )
+
+    os.remove(image_path)
