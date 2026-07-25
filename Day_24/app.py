@@ -17,8 +17,7 @@ st.title("📄 Simple OCR Document Reader")
 st.write("Upload a document image to extract visible text using EasyOCR.")
 
 # Store EasyOCR models in temporary directory
-MODEL_DIR = "/tmp/easyocr_models"
-os.makedirs(MODEL_DIR, exist_ok=True)
+MODEL_DIR = os.path.join(os.path.dirname(__file__), "easyocr_models")
 
 @st.cache_resource(show_spinner=False)
 def get_ocr_reader():
@@ -26,11 +25,11 @@ def get_ocr_reader():
     Load and cache the EasyOCR model.
     """
     return easyocr.Reader(
-        ["en"],
-        gpu=False,
-        model_storage_directory=MODEL_DIR,
-        download_enabled=True
-    )
+    ["en"],
+    gpu=False,
+    model_storage_directory=MODEL_DIR,
+    download_enabled=False
+)
 
 # Sidebar
 st.sidebar.header("Configuration")
