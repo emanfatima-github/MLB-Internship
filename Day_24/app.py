@@ -1,10 +1,10 @@
-import os
 import torch
 import cv2
 import numpy as np
 import streamlit as st
 import easyocr
 
+# Limit CPU threads
 torch.set_num_threads(1)
 
 st.set_page_config(
@@ -14,66 +14,75 @@ st.set_page_config(
 )
 
 st.title("📄 Simple OCR Document Reader")
-st.write("Upload a document image to extract visible text using EasyOCR.")
+st.write("Upload a document image to extract text using EasyOCR.")
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "easyocr_models")
-
-os.makedirs(MODEL_DIR, exist_ok=True)
-
-
-@st.cache_resource(show_spinner=False)
+# Cache OCR model
+@st.cache_resource
 def get_ocr_reader():
     return easyocr.Reader(
         ['en'],
         gpu=False,
-        model_storage_directory=MODEL_DIR,
-        download_enabled=True      # <-- Changed
+        detector=True,
+        recognizer=True,
+        verbose=False
     )
 
-
+# Sidebar
 st.sidebar.header("Configuration")
 
 default_filename = st.sidebar.text_input(
-    "Saved File Name",
+    "Output File Name",
     value="extracted_text"
 )
 
+# Upload image
 uploaded_file = st.file_uploader(
-    "Choose a document image",
+    "Choose an Image",
     type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file is not None:
 
-    file_bytes = np.frombuffer(uploaded_file.read(), np.uint8)
+    st.write("✅ Image uploaded")
 
+    # Convert uploaded image
+    file_bytes = np.frombuffer(uploaded_file.read(), np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     if image is None:
-        st.error("Unable to read image.")
+        st.error("Could not read the uploaded image.")
         st.stop()
 
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    st.image(image_rgb, caption="Uploaded Image", use_container_width=True)
+    st.image(
+        image_rgb,
+        caption="Uploaded Image",
+        use_container_width=True
+    )
 
     st.write("Loading OCR model...")
 
     try:
         reader = get_ocr_reader()
-        st.success("OCR model loaded.")
+        st.success("✅ OCR model loaded")
     except Exception as e:
-        st.error(e)
+        st.error(f"Error loading OCR model:\n{e}")
         st.stop()
 
-    st.write("Starting OCR...")
+    st.write("Running OCR...")
+    st.write(f"Image Shape: {image_rgb.shape}")
 
     try:
 
-        results = reader.readtext(image_rgb)
+        results = reader.readtext(
+            image_rgb,
+            detail=1,
+            paragraph=False,
+            batch_size=1
+        )
 
-        st.success("OCR Finished")
-
+        st.success("✅ OCR Finished")
         st.write(f"Detections Found: {len(results)}")
 
         extracted_text = ""
@@ -81,13 +90,12 @@ if uploaded_file is not None:
         for item in results:
             extracted_text += item[1] + "\n"
 
-        if extracted_text.strip() == "":
-            st.warning("No text detected.")
+        if extracted_text.strip():
 
-        else:
+            st.subheader("Extracted Text")
 
             st.text_area(
-                "Extracted Text",
+                "",
                 extracted_text,
                 height=300
             )
@@ -95,8 +103,12 @@ if uploaded_file is not None:
             st.download_button(
                 "📥 Download Text",
                 extracted_text,
-                file_name=f"{default_filename}.txt"
+                file_name=f"{default_filename}.txt",
+                mime="text/plain"
             )
+
+        else:
+            st.warning("No text detected.")
 
     except Exception as e:
         st.error(f"OCR Error:\n{e}")
