@@ -33,7 +33,8 @@ method = st.selectbox(
     [
         "Binary Thresholding",
         "Adaptive Thresholding",
-        "Otsu Thresholding"
+        "Otsu Thresholding",
+        "Foreground/Background Segmentation"
     ]
 )
 
@@ -49,7 +50,9 @@ if uploaded_file is not None:
     # Convert to grayscale
     gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
-    # Apply selected thresholding method
+    # --------------------------
+    # Binary Thresholding
+    # --------------------------
     if method == "Binary Thresholding":
 
         _, segmented = cv2.threshold(
@@ -59,6 +62,16 @@ if uploaded_file is not None:
             cv2.THRESH_BINARY
         )
 
+        st.subheader("Original Image")
+        st.image(image)
+
+        st.subheader("Segmented Output")
+        segmented_image = Image.fromarray(segmented)
+        st.image(segmented_image)
+
+    # --------------------------
+    # Adaptive Thresholding
+    # --------------------------
     elif method == "Adaptive Thresholding":
 
         segmented = cv2.adaptiveThreshold(
@@ -70,7 +83,17 @@ if uploaded_file is not None:
             2
         )
 
-    else:
+        st.subheader("Original Image")
+        st.image(image)
+
+        st.subheader("Segmented Output")
+        segmented_image = Image.fromarray(segmented)
+        st.image(segmented_image)
+
+    # --------------------------
+    # Otsu Thresholding
+    # --------------------------
+    elif method == "Otsu Thresholding":
 
         _, segmented = cv2.threshold(
             gray,
@@ -79,17 +102,42 @@ if uploaded_file is not None:
             cv2.THRESH_BINARY + cv2.THRESH_OTSU
         )
 
-    # ==========================
-    # Display Images
-    # ==========================
-    st.subheader("Original Image")
-    st.image(image)
+        st.subheader("Original Image")
+        st.image(image)
 
-    st.subheader("Segmented Output")
+        st.subheader("Segmented Output")
+        segmented_image = Image.fromarray(segmented)
+        st.image(segmented_image)
 
-    segmented_image = Image.fromarray(segmented)
+    # --------------------------
+    # Foreground / Background Segmentation
+    # --------------------------
+    else:
 
-    st.image(segmented_image)
+        _, foreground = cv2.threshold(
+            gray,
+            0,
+            255,
+            cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )
+
+        background = cv2.bitwise_not(foreground)
+
+        st.subheader("Original Image")
+        st.image(image)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("Foreground")
+            st.image(Image.fromarray(foreground))
+
+        with col2:
+            st.subheader("Background")
+            st.image(Image.fromarray(background))
+
+        segmented = foreground
+        segmented_image = Image.fromarray(segmented)
 
     # ==========================
     # Download Button
