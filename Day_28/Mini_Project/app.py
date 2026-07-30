@@ -4,6 +4,12 @@ import cv2
 import tempfile
 import os
 from PIL import Image
+import numpy as np
+
+# -----------------------------
+# Fix Ultralytics Settings
+# -----------------------------
+os.environ["YOLO_CONFIG_DIR"] = "/tmp/Ultralytics"
 
 # -----------------------------
 # Page Settings
@@ -14,10 +20,8 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title(" Smart Object Detection Application")
-st.write(
-    "Upload an image or video and detect objects using YOLOv8."
-)
+st.title("🎯 Smart Object Detection Application")
+st.write("Upload an image or video and detect objects using YOLOv8.")
 
 # -----------------------------
 # Load YOLO Model
@@ -48,50 +52,49 @@ if option == "Image":
 
     if uploaded_image is not None:
 
-        image = Image.open(uploaded_image)
+        image = Image.open(uploaded_image).convert("RGB")
 
         st.subheader("Original Image")
-        st.image(image, use_container_width=True)
+        st.image(image, width="stretch")
 
-        # Save temporary image
-        temp_path = "temp_image.jpg"
-        image.save(temp_path)
+        image_np = np.array(image)
 
-        # Run YOLO
-        results = model(temp_path)
+        with st.spinner("Detecting objects..."):
+            results = model(image_np)
 
-        # Save result image
+        annotated_image = results[0].plot()
+
         output_path = "detected_image.jpg"
-        results[0].save(filename=output_path)
+
+        cv2.imwrite(
+            output_path,
+            cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
+        )
 
         st.subheader("Detected Image")
-        st.image(output_path, use_container_width=True)
+        st.image(output_path, width="stretch")
 
-        # Show detections
         st.subheader("Detected Objects")
 
         boxes = results[0].boxes
 
-        if len(boxes) > 0:
+        if len(boxes) == 0:
+            st.info("No objects detected.")
 
+        else:
             for box in boxes:
 
                 class_id = int(box.cls[0])
                 confidence = float(box.conf[0])
 
-                class_name = model.names[class_id]
-
                 st.write(
-                    f"**{class_name}** : {confidence:.2f}"
+                    f"**{model.names[class_id]}** : {confidence:.2f}"
                 )
 
-        else:
-            st.write("No objects detected.")
-
-        # Download image
         with open(output_path, "rb") as file:
+
             st.download_button(
-                label="Download Processed Image",
+                label="⬇ Download Processed Image",
                 data=file,
                 file_name="detected_image.jpg",
                 mime="image/jpeg"
@@ -100,7 +103,7 @@ if option == "Image":
 # ==================================================
 # VIDEO DETECTION
 # ==================================================
-if option == "Video":
+elif option == "Video":
 
     uploaded_video = st.file_uploader(
         "Upload a Video",
@@ -109,6 +112,7 @@ if option == "Video":
 
     if uploaded_video is not None:
 
+        st.subheader("Original Video")
         st.video(uploaded_video)
 
         # Save uploaded video
@@ -120,30 +124,71 @@ if option == "Video":
         temp_video.write(uploaded_video.read())
         temp_video.close()
 
-        st.write("Processing video...")
+        cap = cv2.VideoCapture(temp_video.name)
 
-        # Run YOLO
-        results = model.predict(
-            source=temp_video.name,
-            save=True,
-            project="runs/detect",
-            name="video_result",
-            exist_ok=True
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+
+        if fps == 0:
+            fps = 25
+
+        output_video = "processed_video.mp4"
+
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
+        out = cv2.VideoWriter(
+            output_video,
+            fourcc,
+            fps,
+            (width, height)
         )
 
-        output_video = "runs/detect/video_result/" + os.path.basename(temp_video.name)
+        progress = st.progress(0)
+        status = st.empty()
 
-        if os.path.exists(output_video):
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_number = 0
 
-            st.subheader("Processed Video")
+        while cap.isOpened():
 
-            st.video(output_video)
+            success, frame = cap.read()
 
-            with open(output_video, "rb") as file:
+            if not success:
+                break
 
-                st.download_button(
-                    label="Download Processed Video",
-                    data=file,
-                    file_name="processed_video.mp4",
-                    mime="video/mp4"
-                )
+            results = model(frame)
+
+            annotated_frame = results[0].plot()
+
+            out.write(annotated_frame)
+
+            frame_number += 1
+
+            if total_frames > 0:
+                progress.progress(frame_number / total_frames)
+
+            status.text(
+                f"Processing frame {frame_number} of {total_frames}"
+            )
+
+        cap.release()
+        out.release()
+
+        progress.empty()
+        status.empty()
+
+        st.success("✅ Video processed successfully!")
+
+        st.subheader("Processed Video")
+
+        st.video(output_video)
+
+        with open(output_video, "rb") as file:
+
+            st.download_button(
+                label="⬇ Download Processed Video",
+                data=file,
+                file_name="processed_video.mp4",
+                mime="video/mp4"
+            )
