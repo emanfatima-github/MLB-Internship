@@ -1,0 +1,13 @@
+names:
+- '0'
+- '1'
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: helmet-detection-j7vt9-jukc4
+  url: https://universe.roboflow.com/eman-fatima-e1ncy/helmet-detection-j7vt9-jukc4/dataset/1
+  version: 1
+  workspace: eman-fatima-e1ncy
+test: ../test/images
+train: ../train/images
+val: ../valid/images
