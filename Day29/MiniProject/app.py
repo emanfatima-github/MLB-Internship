@@ -1,8 +1,9 @@
 import streamlit as st
 from ultralytics import YOLO
+from PIL import Image
 import tempfile
 import os
-from PIL import Image
+import cv2
 
 # -----------------------------
 # Page Configuration
@@ -19,16 +20,18 @@ st.write(
 )
 
 # -----------------------------
-# Load Custom Model
+# Load Model
 # -----------------------------
+import os
+from ultralytics import YOLO
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_PATH = os.path.join(
     BASE_DIR,
     "runs",
     "detect",
-    "Construction_Project",
-    "Experiment1",
+    "train",
     "weights",
     "best.pt"
 )
@@ -49,52 +52,52 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
 
-    extension = os.path.splitext(uploaded_file.name)[1].lower()
+    file_extension = os.path.splitext(uploaded_file.name)[1].lower()
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=extension) as tmp:
-        tmp.write(uploaded_file.read())
-        temp_path = tmp.name
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_extension)
+    temp_file.write(uploaded_file.read())
+    temp_file.close()
 
     # ==========================================
     # IMAGE
     # ==========================================
-    if extension in [".jpg", ".jpeg", ".png"]:
+    if file_extension in [".jpg", ".jpeg", ".png"]:
 
         st.subheader("Uploaded Image")
-        st.image(temp_path, use_container_width=True)
+        st.image(temp_file.name, use_container_width=True)
 
         with st.spinner("Running Detection..."):
 
             results = model.predict(
-                source=temp_path,
-                conf=0.25,
-                save=True,
-                project="runs/detect",
-                name="Predictions",
-                exist_ok=True
+                source=temp_file.name,
+                conf=0.25
             )
 
-        output_folder = str(results[0].save_dir)
+        result = results[0]
 
-        prediction_images = [
-            f for f in os.listdir(output_folder)
-            if f.lower().endswith((".jpg", ".jpeg", ".png"))
-        ]
+        predicted_image = result.plot()
 
-        if prediction_images:
+        st.subheader("Prediction Result")
+        st.image(
+            predicted_image,
+            channels="BGR",
+            use_container_width=True
+        )
 
-            prediction_path = os.path.join(output_folder, prediction_images[-1])
+        output_image = tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=".jpg"
+        )
 
-            st.subheader("Prediction Result")
-            st.image(prediction_path, use_container_width=True)
+        Image.fromarray(predicted_image[:, :, ::-1]).save(output_image.name)
 
-            with open(prediction_path, "rb") as file:
-                st.download_button(
-                    label="⬇ Download Processed Image",
-                    data=file,
-                    file_name="prediction.jpg",
-                    mime="image/jpeg"
-                )
+        with open(output_image.name, "rb") as file:
+            st.download_button(
+                "⬇ Download Processed Image",
+                file,
+                file_name="prediction.jpg",
+                mime="image/jpeg"
+            )
 
     # ==========================================
     # VIDEO
@@ -102,40 +105,42 @@ if uploaded_file is not None:
     else:
 
         st.subheader("Uploaded Video")
-        st.video(temp_path)
+        st.video(temp_file.name)
 
         with st.spinner("Running Detection..."):
 
             results = model.predict(
-                source=temp_path,
+                source=temp_file.name,
                 conf=0.25,
                 save=True,
                 project="runs/detect",
-                name="Predictions",
-                exist_ok=True
+                name="video_predictions",
+                exist_ok=False
             )
 
         output_folder = str(results[0].save_dir)
 
-        prediction_videos = [
+        video_files = [
             f for f in os.listdir(output_folder)
-            if f.lower().endswith((".mp4", ".avi", ".mov"))
+            if f.endswith((".mp4", ".avi", ".mov"))
         ]
 
-        if prediction_videos:
+        if len(video_files) > 0:
 
-            prediction_path = os.path.join(output_folder, prediction_videos[-1])
+            prediction_video = os.path.join(output_folder, video_files[0])
 
             st.subheader("Prediction Result")
-            st.video(prediction_path)
+            st.video(prediction_video)
 
-            with open(prediction_path, "rb") as file:
+            with open(prediction_video, "rb") as file:
                 st.download_button(
-                    label="⬇ Download Processed Video",
-                    data=file,
+                    "⬇ Download Processed Video",
+                    file,
                     file_name="prediction.mp4",
                     mime="video/mp4"
                 )
+        else:
+            st.error("Prediction video was not generated.")
 
 st.markdown("---")
 st.write("Developed using YOLOv8 and Streamlit")
