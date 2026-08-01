@@ -66,7 +66,8 @@ if uploaded_file:
     if extension in [".jpg", ".jpeg", ".png"]:
 
         st.subheader("Uploaded Image")
-        st.image(temp_file.name, use_container_width=True)
+        image = Image.open(temp_file.name)
+        st.image(image, use_container_width=True)
 
         with st.spinner("Running Detection..."):
 
@@ -80,11 +81,8 @@ if uploaded_file:
         plotted = result.plot()
 
         st.subheader("Prediction Result")
-        st.image(
-            plotted,
-            channels="BGR",
-            use_container_width=True
-        )
+        plotted = Image.fromarray(plotted[:, :, ::-1])
+        st.image(plotted, use_container_width=True)
 
         save_path = tempfile.NamedTemporaryFile(
             delete=False,
