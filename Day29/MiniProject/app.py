@@ -91,7 +91,7 @@ if uploaded_file:
             suffix=".jpg"
         ).name
 
-        Image.fromarray(cv2.cvtColor(plotted, cv2.COLOR_BGR2RGB)).save(save_path)
+        Image.fromarray(plotted[:, :, ::-1]).save(save_path)
 
         with open(save_path, "rb") as f:
             st.download_button(
