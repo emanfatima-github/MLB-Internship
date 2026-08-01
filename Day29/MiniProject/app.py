@@ -1,141 +1,83 @@
 import streamlit as st
 from ultralytics import YOLO
-import tempfile
-import os
 from PIL import Image
+import cv2
 
 # -----------------------------
 # Page Configuration
 # -----------------------------
 st.set_page_config(
-    page_title="Construction Equipment Detection",
-    page_icon="🚜",
-    layout="centered"
+    page_title="Custom YOLO Object Detection",
+    page_icon="🎯",
+    layout="wide"
 )
 
-st.title("🚜 Construction Equipment Detection")
-st.write(
-    "Upload an image or video to detect construction equipment using a trained YOLO model."
-)
+st.title("🎯 Custom YOLO Object Detection")
+st.write("Upload an image and run detection using your trained YOLO model.")
 
 # -----------------------------
-# Load Custom Model
+# Load Model
 # -----------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+@st.cache_resource
+def load_model():
+    return YOLO("best.pt")  # Your trained custom model
 
-MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "runs",
-    "detect",
-    "Construction_Project",
-    "Experiment1",
-    "weights",
-    "best.pt"
-)
-
-if not os.path.exists(MODEL_PATH):
-    st.error(f"Model file not found:\n{MODEL_PATH}")
-    st.stop()
-
-model = YOLO(MODEL_PATH)
+model = load_model()
 
 # -----------------------------
-# Upload File
+# Upload Image
 # -----------------------------
 uploaded_file = st.file_uploader(
-    "Choose an Image or Video",
-    type=["jpg", "jpeg", "png", "mp4", "avi", "mov"]
+    "Choose an image",
+    type=["jpg", "jpeg", "png"]
 )
 
-if uploaded_file is not None:
+if uploaded_file:
 
-    extension = os.path.splitext(uploaded_file.name)[1].lower()
+    image = Image.open(uploaded_file)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=extension) as tmp:
-        tmp.write(uploaded_file.read())
-        temp_path = tmp.name
+    st.subheader("Original Image")
+    st.image(image, use_container_width=True)
 
-    # ==========================================
-    # IMAGE
-    # ==========================================
-    if extension in [".jpg", ".jpeg", ".png"]:
+    if st.button("Run Detection"):
 
-        st.subheader("Uploaded Image")
-        st.image(temp_path, use_container_width=True)
+        with st.spinner("Running inference..."):
 
-        with st.spinner("Running Detection..."):
+            results = model(image)
+            result = results[0]
 
-            results = model.predict(
-                source=temp_path,
-                conf=0.25,
-                save=True,
-                project="runs/detect",
-                name="Predictions",
-                exist_ok=True
-            )
-
-        output_folder = str(results[0].save_dir)
-
-        prediction_images = [
-            f for f in os.listdir(output_folder)
-            if f.lower().endswith((".jpg", ".jpeg", ".png"))
-        ]
-
-        if prediction_images:
-
-            prediction_path = os.path.join(output_folder, prediction_images[-1])
+            # Annotated image
+            annotated_image = result.plot()
 
             st.subheader("Prediction Result")
-            st.image(prediction_path, use_container_width=True)
+            st.image(annotated_image, use_container_width=True)
 
-            with open(prediction_path, "rb") as file:
+            # Save prediction image
+            output_path = "prediction.jpg"
+            cv2.imwrite(
+                output_path,
+                cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
+            )
+
+            # Download button
+            with open(output_path, "rb") as file:
                 st.download_button(
-                    label="⬇ Download Processed Image",
+                    label="📥 Download Prediction",
                     data=file,
                     file_name="prediction.jpg",
                     mime="image/jpeg"
                 )
 
-    # ==========================================
-    # VIDEO
-    # ==========================================
-    else:
+            # Display detected objects
+            st.subheader("Detected Objects")
 
-        st.subheader("Uploaded Video")
-        st.video(temp_path)
+            if len(result.boxes) > 0:
+                for box in result.boxes:
+                    cls = int(box.cls[0])
+                    conf = float(box.conf[0])
 
-        with st.spinner("Running Detection..."):
-
-            results = model.predict(
-                source=temp_path,
-                conf=0.25,
-                save=True,
-                project="runs/detect",
-                name="Predictions",
-                exist_ok=True
-            )
-
-        output_folder = str(results[0].save_dir)
-
-        prediction_videos = [
-            f for f in os.listdir(output_folder)
-            if f.lower().endswith((".mp4", ".avi", ".mov"))
-        ]
-
-        if prediction_videos:
-
-            prediction_path = os.path.join(output_folder, prediction_videos[-1])
-
-            st.subheader("Prediction Result")
-            st.video(prediction_path)
-
-            with open(prediction_path, "rb") as file:
-                st.download_button(
-                    label="⬇ Download Processed Video",
-                    data=file,
-                    file_name="prediction.mp4",
-                    mime="video/mp4"
-                )
-
-st.markdown("---")
-st.write("Developed using YOLOv8 and Streamlit")
+                    st.write(
+                        f"**{model.names[cls]}** : {conf:.2f}"
+                    )
+            else:
+                st.info("No objects detected.")
