@@ -1,22 +1,47 @@
 import streamlit as st
 from ultralytics import YOLO
-from PIL import Image
 import tempfile
 import os
-import cv2
 
-st.set_page_config(page_title="Construction Equipment Detection", layout="centered")
+# -----------------------------
+# Page Configuration
+# -----------------------------
+st.set_page_config(
+    page_title="Construction Equipment Detection",
+    layout="centered"
+)
 
-st.title("🚜 Construction Equipment Detection")
-st.write("Upload an image or video to detect construction equipment using a custom YOLO model.")
+st.title(" Construction Equipment Detection")
+st.write(
+    "Upload an image or video to detect construction equipment using a trained YOLO model."
+)
 
-# Load your trained model
-MODEL_PATH = "runs/detect/Construction_Project/Experiment1/weights/best.pt"
+# -----------------------------
+# Load Model
+# -----------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(
+    BASE_DIR,
+    "runs",
+    "detect",
+    "Construction_Project",
+    "Experiment1",
+    "weights",
+    "best.pt"
+)
+
+if not os.path.exists(MODEL_PATH):
+    st.error(f"Model file not found:\n{MODEL_PATH}")
+    st.stop()
 
 model = YOLO(MODEL_PATH)
 
+# -----------------------------
+# File Upload
+# -----------------------------
 uploaded_file = st.file_uploader(
-    "Upload Image or Video",
+    "Upload an Image or Video",
     type=["jpg", "jpeg", "png", "mp4", "avi", "mov"]
 )
 
@@ -28,50 +53,62 @@ if uploaded_file is not None:
         temp_file.write(uploaded_file.read())
         temp_path = temp_file.name
 
+    # -----------------------------
+    # Image Inference
+    # -----------------------------
     if suffix.lower() in [".jpg", ".jpeg", ".png"]:
 
-        st.image(temp_path, caption="Uploaded Image")
+        st.subheader("Uploaded Image")
+        st.image(temp_path, use_container_width=True)
 
         results = model.predict(
             source=temp_path,
+            conf=0.25,
             save=True,
-            conf=0.25
+            project="runs/detect",
+            name="Predictions",
+            exist_ok=True
         )
 
-        output_path = results[0].save_dir
+        prediction_path = results[0].save_dir / os.path.basename(temp_path)
 
-        image_name = os.path.basename(temp_path)
+        st.subheader("Prediction Result")
+        st.image(str(prediction_path), use_container_width=True)
 
-        prediction = os.path.join(output_path, image_name)
-
-        st.image(prediction, caption="Prediction")
-
-        with open(prediction, "rb") as file:
+        with open(prediction_path, "rb") as file:
             st.download_button(
-                "Download Processed Image",
-                file,
-                file_name="prediction.jpg"
+                label="⬇ Download Processed Image",
+                data=file,
+                file_name="prediction.jpg",
+                mime="image/jpeg"
             )
 
+    # -----------------------------
+    # Video Inference
+    # -----------------------------
     else:
+
+        st.subheader("Uploaded Video")
+        st.video(temp_path)
 
         results = model.predict(
             source=temp_path,
+            conf=0.25,
             save=True,
-            conf=0.25
+            project="runs/detect",
+            name="Predictions",
+            exist_ok=True
         )
 
-        output_path = results[0].save_dir
+        prediction_path = results[0].save_dir / os.path.basename(temp_path)
 
-        video_name = os.path.basename(temp_path)
+        st.subheader("Prediction Result")
+        st.video(str(prediction_path))
 
-        prediction = os.path.join(output_path, video_name)
-
-        st.video(prediction)
-
-        with open(prediction, "rb") as file:
+        with open(prediction_path, "rb") as file:
             st.download_button(
-                "Download Processed Video",
-                file,
-                file_name="prediction.mp4"
+                label="⬇ Download Processed Video",
+                data=file,
+                file_name="prediction.mp4",
+                mime="video/mp4"
             )
