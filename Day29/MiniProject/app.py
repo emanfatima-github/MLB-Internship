@@ -1,13 +1,13 @@
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
-import tempfile
+import numpy as np
 import os
-import cv2
+import tempfile
 
-# ---------------------------------
+# -----------------------------------
 # Page Configuration
-# ---------------------------------
+# -----------------------------------
 st.set_page_config(
     page_title="Construction Equipment Detection",
     page_icon="🚜",
@@ -16,12 +16,12 @@ st.set_page_config(
 
 st.title("🚜 Construction Equipment Detection")
 st.write(
-    "Upload an image or video to detect construction equipment using a custom YOLO model."
+    "Upload an image to detect construction equipment using a trained YOLO model."
 )
 
-# ---------------------------------
-# Load Model
-# ---------------------------------
+# -----------------------------------
+# Load YOLO Model
+# -----------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_PATH = os.path.join(
@@ -34,131 +34,88 @@ MODEL_PATH = os.path.join(
 )
 
 if not os.path.exists(MODEL_PATH):
-    st.error("best.pt not found.")
-    st.write(MODEL_PATH)
+    st.error("❌ best.pt model not found.")
+    st.write("Expected Path:")
+    st.code(MODEL_PATH)
     st.stop()
 
-model = YOLO(MODEL_PATH)
+@st.cache_resource
+def load_model():
+    return YOLO(MODEL_PATH)
 
-# ---------------------------------
-# Upload File
-# ---------------------------------
+model = load_model()
+
+# -----------------------------------
+# Upload Image
+# -----------------------------------
 uploaded_file = st.file_uploader(
-    "Upload an Image or Video",
-    type=["jpg", "jpeg", "png", "mp4", "avi", "mov"]
+    "Choose an Image",
+    type=["jpg", "jpeg", "png"]
 )
 
-if uploaded_file:
+if uploaded_file is not None:
 
-    extension = os.path.splitext(uploaded_file.name)[1].lower()
+    image = Image.open(uploaded_file).convert("RGB")
 
-    temp_file = tempfile.NamedTemporaryFile(
-        delete=False,
-        suffix=extension
-    )
+    st.subheader("Uploaded Image")
+    st.image(image, use_container_width=True)
 
-    temp_file.write(uploaded_file.read())
-    temp_file.close()
+    # Save uploaded image temporarily
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp:
+        image.save(temp.name)
+        temp_path = temp.name
 
-    # ======================================
-    # IMAGE
-    # ======================================
-    if extension in [".jpg", ".jpeg", ".png"]:
+    # -----------------------------------
+    # Run Prediction
+    # -----------------------------------
+    with st.spinner("Detecting objects..."):
 
-        st.subheader("Uploaded Image")
-        image = Image.open(temp_file.name)
-        st.image(image, use_container_width=True)
+        results = model.predict(
+            source=temp_path,
+            conf=0.25,
+            save=False
+        )
 
-        with st.spinner("Running Detection..."):
+    result = results[0]
 
-            results = model.predict(
-                source=temp_file.name,
-                conf=0.25
-            )
+    # Draw bounding boxes
+    plotted = result.plot()
 
-        result = results[0]
+    predicted_image = Image.fromarray(plotted[:, :, ::-1])
 
-        plotted = result.plot()
+    st.subheader("Prediction Result")
+    st.image(predicted_image, use_container_width=True)
 
-        st.subheader("Prediction Result")
-        plotted = Image.fromarray(plotted[:, :, ::-1])
-        st.image(plotted, use_container_width=True)
+    # -----------------------------------
+    # Detected Objects
+    # -----------------------------------
+    st.subheader("Detected Objects")
 
-        save_path = tempfile.NamedTemporaryFile(
-            delete=False,
-            suffix=".jpg"
-        ).name
+    if len(result.boxes) == 0:
+        st.info("No objects detected.")
 
-        Image.fromarray(plotted[:, :, ::-1]).save(save_path)
-
-        with open(save_path, "rb") as f:
-            st.download_button(
-                "⬇ Download Processed Image",
-                f,
-                file_name="prediction.jpg",
-                mime="image/jpeg"
-            )
-
-        st.subheader("Detected Objects")
-
-        boxes = result.boxes
-
-        if len(boxes) == 0:
-            st.info("No objects detected.")
-
-        else:
-            for box in boxes:
-                cls = int(box.cls[0])
-                conf = float(box.conf[0])
-
-                st.write(
-                    f"**{model.names[cls]}** — Confidence: **{conf:.2f}**"
-                )
-
-    # ======================================
-    # VIDEO
-    # ======================================
     else:
+        for box in result.boxes:
+            class_id = int(box.cls[0])
+            confidence = float(box.conf[0])
 
-        st.subheader("Uploaded Video")
-        st.video(temp_file.name)
-
-        with st.spinner("Processing Video..."):
-
-            output_folder = tempfile.mkdtemp()
-
-            model.predict(
-                source=temp_file.name,
-                conf=0.25,
-                save=True,
-                project=output_folder,
-                name="prediction"
+            st.write(
+                f"**{model.names[class_id]}** — Confidence: **{confidence:.2f}**"
             )
 
-        prediction_folder = os.path.join(output_folder, "prediction")
+    # -----------------------------------
+    # Download Result
+    # -----------------------------------
+    output_path = os.path.join(tempfile.gettempdir(), "prediction.jpg")
+    predicted_image.save(output_path)
 
-        output_video = None
-
-        for file in os.listdir(prediction_folder):
-            if file.lower().endswith((".mp4", ".avi", ".mov")):
-                output_video = os.path.join(prediction_folder, file)
-                break
-
-        if output_video:
-
-            st.subheader("Prediction Result")
-            st.video(output_video)
-
-            with open(output_video, "rb") as f:
-                st.download_button(
-                    "⬇ Download Processed Video",
-                    f,
-                    file_name="prediction.mp4",
-                    mime="video/mp4"
-                )
-
-        else:
-            st.error("Processed video was not generated.")
+    with open(output_path, "rb") as file:
+        st.download_button(
+            label="⬇ Download Processed Image",
+            data=file,
+            file_name="prediction.jpg",
+            mime="image/jpeg"
+        )
 
 st.markdown("---")
 st.caption("Custom Object Detection using YOLOv8")
