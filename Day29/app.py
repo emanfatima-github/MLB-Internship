@@ -1,104 +1,81 @@
-import io
-from pathlib import Path
-import cv2
-import numpy as np
 import streamlit as st
-from PIL import Image
 from ultralytics import YOLO
+from PIL import Image
+import tempfile
+import cv2
+import os
 
-# -----------------------------
-# Page Configuration
-# -----------------------------
 st.set_page_config(
     page_title="Construction Equipment Detection",
-    page_icon="🏗️",
-    layout="centered",
+    page_icon="🚜",
+    layout="centered"
 )
 
-st.title("🏗️ Construction Equipment Detection System")
-st.write("Upload an image to detect construction equipment using your trained YOLOv8 model.")
-
-# -----------------------------
-# Load YOLO Model
-# -----------------------------
-MODEL_PATH = Path(__file__).parent / "best.pt"
+st.title("🚜 Construction Equipment Detection System")
 
 @st.cache_resource
 def load_model():
-    return YOLO(str(MODEL_PATH))
+    return YOLO("best.pt")
 
-try:
-    with st.spinner("Loading YOLO model..."):
-        model = load_model()
-except Exception as e:
-    st.error("Unable to load YOLO model.")
-    st.exception(e)
-    st.stop()
+model = load_model()
 
-# -----------------------------
-# Upload Image
-# -----------------------------
-uploaded_image = st.file_uploader(
-    "Upload an Image",
-    type=["jpg", "jpeg", "png"],
+uploaded = st.file_uploader(
+    "Upload Image or Video",
+    type=["jpg","jpeg","png","mp4"]
 )
 
-if uploaded_image is not None:
-    image = Image.open(uploaded_image).convert("RGB")
+if uploaded:
 
-    st.subheader("Original Image")
-    st.image(image, use_container_width=True)
+    suffix = os.path.splitext(uploaded.name)[1]
 
-    image_array = np.array(image)
+    temp = tempfile.NamedTemporaryFile(delete=False,suffix=suffix)
 
-    # -----------------------------
-    # Run Detection
-    # -----------------------------
-    with st.spinner("Detecting Construction Equipment..."):
-        results = model.predict(image_array, verbose=False)
+    temp.write(uploaded.read())
 
-    result = results[0]
+    temp.close()
 
-    detected_image = result.plot()
-    detected_image = cv2.cvtColor(
-        detected_image,
-        cv2.COLOR_BGR2RGB,
-    )
+    if suffix.lower()==".mp4":
 
-    st.subheader("Detected Image")
-    st.image(detected_image, use_container_width=True)
+        result = model.predict(
+            source=temp.name,
+            save=True,
+            conf=0.25
+        )
 
-    total = len(result.boxes)
-    st.success(f"Total Objects Detected: {total}")
+        output = result[0].save_dir
 
-    if total == 0:
-        st.warning("No construction equipment detected.")
-    else:
-        st.subheader("Detection Details")
+        files=os.listdir(output)
 
-        for i, box in enumerate(result.boxes, start=1):
-            class_id = int(box.cls[0])
-            confidence = float(box.conf[0])
-            class_name = model.names.get(class_id, str(class_id))
+        video=[f for f in files if f.endswith(".mp4")][0]
 
-            st.write(
-                f"**{i}. {class_name}** — Confidence: **{confidence:.2%}**"
+        st.video(os.path.join(output,video))
+
+        with open(os.path.join(output,video),"rb") as f:
+            st.download_button(
+                "Download Video",
+                f,
+                file_name=video
             )
 
-    # -----------------------------
-    # Download Result
-    # -----------------------------
-    output_image = Image.fromarray(detected_image)
-    buffer = io.BytesIO()
-    output_image.save(buffer, format="PNG")
+    else:
 
-    st.download_button(
-        label="📥 Download Detected Image",
-        data=buffer.getvalue(),
-        file_name="construction_equipment_detection_result.png",
-        mime="image/png",
-        use_container_width=True,
-    )
+        result=model.predict(
+            source=temp.name,
+            save=True,
+            conf=0.25
+        )
 
-st.markdown("---")
-st.caption("Developed using Streamlit + Ultralytics YOLOv8")
+        output=result[0].save_dir
+
+        files=os.listdir(output)
+
+        image=[f for f in files if f.endswith((".jpg",".png",".jpeg"))][0]
+
+        st.image(os.path.join(output,image))
+
+        with open(os.path.join(output,image),"rb") as f:
+            st.download_button(
+                "Download Image",
+                f,
+                file_name=image
+            )
