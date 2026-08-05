@@ -4,6 +4,9 @@ import cv2
 import tempfile
 from PIL import Image
 
+# -----------------------------
+# Page Configuration
+# -----------------------------
 st.set_page_config(
     page_title="Smart People Counting System",
     page_icon="👥",
@@ -11,8 +14,11 @@ st.set_page_config(
 )
 
 st.title("👥 Smart People Counting System")
-st.write("Upload an image or video to detect and count people.")
+st.write("Upload an image or video to detect and count people using YOLOv8.")
 
+# -----------------------------
+# Load Model
+# -----------------------------
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
@@ -26,9 +32,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
 
-    # -----------------------------
+    # ==================================================
     # IMAGE
-    # -----------------------------
+    # ==================================================
     if uploaded_file.type.startswith("image"):
 
         image = Image.open(uploaded_file)
@@ -37,19 +43,21 @@ if uploaded_file is not None:
 
         result = results[0]
 
-        people = 0
+        people_count = 0
 
         for box in result.boxes:
             if int(box.cls[0]) == 0:
-                people += 1
+                people_count += 1
 
         processed = result.plot()
 
-        st.image(image, caption="Original Image", use_container_width=True)
+        st.subheader("Original Image")
+        st.image(image)
 
-        st.image(processed, caption="Processed Image", use_container_width=True)
+        st.subheader("Processed Image")
+        st.image(processed)
 
-        st.success(f"People Detected: {people}")
+        st.success(f"People Detected: {people_count}")
 
         output_image = "processed_image.jpg"
 
@@ -62,18 +70,20 @@ if uploaded_file is not None:
             st.download_button(
                 "Download Processed Image",
                 file,
-                file_name="processed_image.jpg"
+                file_name="processed_image.jpg",
+                mime="image/jpeg"
             )
 
-    # -----------------------------
+    # ==================================================
     # VIDEO
-    # -----------------------------
+    # ==================================================
     else:
 
-        temp = tempfile.NamedTemporaryFile(delete=False)
-        temp.write(uploaded_file.read())
+        temp_video = tempfile.NamedTemporaryFile(delete=False)
+        temp_video.write(uploaded_file.read())
+        temp_video.close()
 
-        cap = cv2.VideoCapture(temp.name)
+        cap = cv2.VideoCapture(temp_video.name)
 
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -88,13 +98,13 @@ if uploaded_file is not None:
             (width, height)
         )
 
-        frame_window = st.empty()
+        frame_placeholder = st.empty()
 
-        current_count = st.empty()
+        current_placeholder = st.empty()
 
-        max_count = st.empty()
+        maximum_placeholder = st.empty()
 
-        maximum = 0
+        maximum_people = 0
 
         while cap.isOpened():
 
@@ -110,7 +120,7 @@ if uploaded_file is not None:
                 verbose=False
             )
 
-            people = 0
+            people_count = 0
 
             if results[0].boxes is not None:
 
@@ -119,11 +129,11 @@ if uploaded_file is not None:
                     if int(box.cls[0]) != 0:
                         continue
 
-                    people += 1
+                    people_count += 1
 
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-                    conf = float(box.conf[0])
+                    confidence = float(box.conf[0])
 
                     track_id = -1
 
@@ -134,52 +144,51 @@ if uploaded_file is not None:
                         frame,
                         (x1, y1),
                         (x2, y2),
-                        (0,255,0),
+                        (0, 255, 0),
                         2
                     )
 
                     cv2.putText(
                         frame,
-                        f"ID:{track_id} {conf:.2f}",
-                        (x1, y1-10),
+                        f"ID:{track_id} {confidence:.2f}",
+                        (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.6,
-                        (0,255,0),
+                        (0, 255, 0),
                         2
                     )
 
-            maximum = max(maximum, people)
+            maximum_people = max(maximum_people, people_count)
 
             cv2.putText(
                 frame,
-                f"People: {people}",
-                (20,40),
+                f"People: {people_count}",
+                (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
-                (0,0,255),
+                (0, 0, 255),
                 2
             )
 
             cv2.putText(
                 frame,
-                f"Maximum: {maximum}",
-                (20,80),
+                f"Maximum: {maximum_people}",
+                (20, 80),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
-                (255,0,0),
+                (255, 0, 0),
                 2
             )
 
             writer.write(frame)
 
-            frame_window.image(
-                cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
-                use_container_width=True
-            )
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            current_count.info(f"Current People Count: {people}")
+            frame_placeholder.image(frame_rgb)
 
-            max_count.success(f"Maximum People Count: {maximum}")
+            current_placeholder.info(f"Current People Count: {people_count}")
+
+            maximum_placeholder.success(f"Maximum People Count: {maximum_people}")
 
         cap.release()
         writer.release()
@@ -192,5 +201,6 @@ if uploaded_file is not None:
             st.download_button(
                 "Download Processed Video",
                 file,
-                file_name="processed_video.mp4"
+                file_name="processed_video.mp4",
+                mime="video/mp4"
             )
