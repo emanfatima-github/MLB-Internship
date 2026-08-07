@@ -110,9 +110,8 @@ if uploaded_file is not None:
         st.success(f"People Detected: {people_count}")
 
         st.image(
-            output_image,
-            caption="Processed Image",
-            use_container_width=True
+        output_image,
+        caption="Processed Image"
         )
 
         with open(output_image, "rb") as f:
