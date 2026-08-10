@@ -1,11 +1,20 @@
 import cv2
 import time
 import pandas as pd
-import gradio as gr
+import streamlit as st
 from ultralytics import YOLO
+
+
+# -----------------------------
+# Load YOLO Model
+# -----------------------------
 
 model = YOLO("yolov8n.pt")
 
+
+# -----------------------------
+# Video Processing
+# -----------------------------
 
 def process_video(
     video_path,
@@ -16,8 +25,6 @@ def process_video(
     image_size=640,
     frame_skip=1
 ):
-    if video_path is None:
-        return None, None, "Please upload a video."
 
     cap = cv2.VideoCapture(video_path)
 
@@ -31,6 +38,7 @@ def process_video(
     if video_fps <= 0:
         video_fps = 30
 
+    # ROI coordinates
     x1 = int(width * roi_x1 / 100)
     y1 = int(height * roi_y1 / 100)
     x2 = int(width * roi_x2 / 100)
@@ -39,6 +47,7 @@ def process_video(
     output_path = "processed_video.mp4"
 
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
     out = cv2.VideoWriter(
         output_path,
         fourcc,
@@ -47,15 +56,23 @@ def process_video(
     )
 
     previous_inside = set()
+
     all_ids = set()
     entered_ids = set()
     exited_ids = set()
+
     events = []
 
     max_roi_objects = 0
+
     frame_number = 0
     processed_frames = 0
-    processing_start = time.time()
+
+    start_time = time.time()
+
+    # -----------------------------
+    # Process Frames
+    # -----------------------------
 
     while True:
 
@@ -66,17 +83,20 @@ def process_video(
 
         frame_number += 1
 
+        # Frame skipping
         if frame_number % frame_skip != 0:
             out.write(frame)
             continue
 
         processed_frames += 1
 
+        # Resize for inference
         resized_frame = cv2.resize(
             frame,
             (image_size, image_size)
         )
 
+        # YOLO Tracking
         results = model.track(
             resized_frame,
             persist=True,
@@ -86,6 +106,10 @@ def process_video(
 
         current_inside = set()
 
+        # -----------------------------
+        # Object Detection & Tracking
+        # -----------------------------
+
         if results[0].boxes is not None:
 
             for box in results[0].boxes:
@@ -94,6 +118,7 @@ def process_video(
                     continue
 
                 track_id = int(box.id[0])
+
                 all_ids.add(track_id)
 
                 bx1, by1, bx2, by2 = map(
@@ -101,6 +126,7 @@ def process_video(
                     box.xyxy[0]
                 )
 
+                # Convert coordinates back
                 bx1 = int(bx1 * width / image_size)
                 bx2 = int(bx2 * width / image_size)
                 by1 = int(by1 * height / image_size)
@@ -112,14 +138,17 @@ def process_video(
                 class_id = int(box.cls[0])
                 class_name = model.names[class_id]
 
+                # Check ROI
                 inside_roi = (
-                    x1 <= center_x <= x2 and
+                    x1 <= center_x <= x2
+                    and
                     y1 <= center_y <= y2
                 )
 
                 if inside_roi:
                     current_inside.add(track_id)
 
+                # Bounding box
                 cv2.rectangle(
                     frame,
                     (bx1, by1),
@@ -128,6 +157,7 @@ def process_video(
                     2
                 )
 
+                # Tracking ID
                 cv2.putText(
                     frame,
                     f"ID {track_id} - {class_name}",
@@ -138,34 +168,64 @@ def process_video(
                     2
                 )
 
+                # Center point
+                cv2.circle(
+                    frame,
+                    (center_x, center_y),
+                    4,
+                    (0, 0, 255),
+                    -1
+                )
+
+        # -----------------------------
+        # Entry Detection
+        # -----------------------------
+
         entries = current_inside - previous_inside
 
         for track_id in entries:
+
             entered_ids.add(track_id)
 
             events.append({
                 "Tracking ID": track_id,
                 "Event Type": "Entry",
-                "Timestamp": frame_number / video_fps
+                "Timestamp": round(
+                    frame_number / video_fps,
+                    2
+                )
             })
+
+        # -----------------------------
+        # Exit Detection
+        # -----------------------------
 
         exits = previous_inside - current_inside
 
         for track_id in exits:
+
             exited_ids.add(track_id)
 
             events.append({
                 "Tracking ID": track_id,
                 "Event Type": "Exit",
-                "Timestamp": frame_number / video_fps
+                "Timestamp": round(
+                    frame_number / video_fps,
+                    2
+                )
             })
 
         previous_inside = current_inside.copy()
 
+        # Maximum objects in ROI
         max_roi_objects = max(
             max_roi_objects,
             len(current_inside)
         )
+
+        # -----------------------------
+        # Draw ROI
+        # -----------------------------
 
         cv2.rectangle(
             frame,
@@ -185,8 +245,21 @@ def process_video(
             2
         )
 
-        elapsed = time.time() - processing_start
-        fps = processed_frames / elapsed if elapsed > 0 else 0
+        # -----------------------------
+        # FPS
+        # -----------------------------
+
+        elapsed_time = time.time() - start_time
+
+        current_fps = (
+            processed_frames / elapsed_time
+            if elapsed_time > 0
+            else 0
+        )
+
+        # -----------------------------
+        # Display Statistics
+        # -----------------------------
 
         cv2.putText(
             frame,
@@ -210,7 +283,7 @@ def process_video(
 
         cv2.putText(
             frame,
-            f"FPS: {fps:.2f}",
+            f"FPS: {current_fps:.2f}",
             (20, 90),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
@@ -218,17 +291,27 @@ def process_video(
             2
         )
 
+        # Save processed frame
         out.write(frame)
+
+    # -----------------------------
+    # Release Video
+    # -----------------------------
 
     cap.release()
     out.release()
 
-    total_time = time.time() - processing_start
+    total_time = time.time() - start_time
+
     average_fps = (
         processed_frames / total_time
         if total_time > 0
         else 0
     )
+
+    # -----------------------------
+    # Save Events CSV
+    # -----------------------------
 
     events_path = "events.csv"
 
@@ -246,6 +329,10 @@ def process_video(
         index=False
     )
 
+    # -----------------------------
+    # Final Summary
+    # -----------------------------
+
     summary = (
         f"Total Objects: {len(all_ids)}\n"
         f"Total Entries: {len(entered_ids)}\n"
@@ -258,103 +345,182 @@ def process_video(
     return output_path, events_path, summary
 
 
-def gradio_process(
-    video,
-    roi_x1,
-    roi_y1,
-    roi_x2,
-    roi_y2,
-    image_size,
-    frame_skip
+# -----------------------------
+# Streamlit Interface
+# -----------------------------
+
+st.set_page_config(
+    page_title="Smart Video Analytics",
+    layout="wide"
+)
+
+st.title("Smart Video Analytics System")
+
+st.write(
+    "Upload a video to detect, track, count, "
+    "and analyze moving objects."
+)
+
+
+# -----------------------------
+# Upload Video
+# -----------------------------
+
+uploaded_video = st.file_uploader(
+    "Upload Video",
+    type=["mp4", "avi", "mov"]
+)
+
+
+# -----------------------------
+# ROI Settings
+# -----------------------------
+
+st.subheader("ROI Settings")
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    roi_x1 = st.slider(
+        "ROI X1 (%)",
+        0,
+        100,
+        20
+    )
+
+    roi_y1 = st.slider(
+        "ROI Y1 (%)",
+        0,
+        100,
+        20
+    )
+
+with col2:
+
+    roi_x2 = st.slider(
+        "ROI X2 (%)",
+        0,
+        100,
+        80
+    )
+
+    roi_y2 = st.slider(
+        "ROI Y2 (%)",
+        0,
+        100,
+        80
+    )
+
+
+# -----------------------------
+# Performance Settings
+# -----------------------------
+
+st.subheader("Processing Settings")
+
+image_size = st.selectbox(
+    "Image Size",
+    [640, 480],
+    index=0
+)
+
+frame_skip = st.selectbox(
+    "Frame Skipping",
+    [1, 2],
+    index=0
+)
+
+
+# -----------------------------
+# Start Processing
+# -----------------------------
+
+if st.button(
+    "Start Processing",
+    type="primary"
 ):
-    return process_video(
-        video,
-        roi_x1,
-        roi_y1,
-        roi_x2,
-        roi_y2,
-        image_size,
-        frame_skip
-    )
 
+    if uploaded_video is None:
 
-with gr.Blocks() as app:
-
-    gr.Markdown("# Smart Video Analytics System")
-
-    video_input = gr.Video(
-        label="Upload Video"
-    )
-
-    with gr.Row():
-
-        roi_x1 = gr.Slider(
-            0, 100, 20,
-            label="ROI X1 (%)"
+        st.warning(
+            "Please upload a video first."
         )
 
-        roi_y1 = gr.Slider(
-            0, 100, 20,
-            label="ROI Y1 (%)"
-        )
+    else:
 
-    with gr.Row():
+        input_path = "input_video.mp4"
 
-        roi_x2 = gr.Slider(
-            0, 100, 80,
-            label="ROI X2 (%)"
-        )
+        with open(input_path, "wb") as file:
 
-        roi_y2 = gr.Slider(
-            0, 100, 80,
-            label="ROI Y2 (%)"
-        )
+            file.write(
+                uploaded_video.getbuffer()
+            )
 
-    image_size = gr.Radio(
-        choices=[640, 480],
-        value=640,
-        label="Image Size"
-    )
+        progress = st.progress(0)
 
-    frame_skip = gr.Radio(
-        choices=[1, 2],
-        value=1,
-        label="Frame Skipping"
-    )
+        with st.spinner(
+            "Processing video..."
+        ):
 
-    process_button = gr.Button(
-        "Start Processing"
-    )
+            output_path, events_path, summary = process_video(
+                input_path,
+                roi_x1,
+                roi_y1,
+                roi_x2,
+                roi_y2,
+                image_size,
+                frame_skip
+            )
 
-    output_video = gr.Video(
-        label="Processed Video"
-    )
+        progress.progress(100)
 
-    summary = gr.Textbox(
-        label="Analytics Summary"
-    )
+        if output_path is None:
 
-    events_file = gr.File(
-        label="Download events.csv"
-    )
+            st.error(summary)
 
-    process_button.click(
-        fn=gradio_process,
-        inputs=[
-            video_input,
-            roi_x1,
-            roi_y1,
-            roi_x2,
-            roi_y2,
-            image_size,
-            frame_skip
-        ],
-        outputs=[
-            output_video,
-            events_file,
-            summary
-        ]
-    )
+        else:
 
+            st.success(
+                "Video processing completed!"
+            )
 
-app.launch()
+            # -----------------------------
+            # Summary
+            # -----------------------------
+
+            st.subheader(
+                "Analytics Summary"
+            )
+
+            st.text(summary)
+
+            # -----------------------------
+            # Processed Video
+            # -----------------------------
+
+            st.subheader(
+                "Processed Video"
+            )
+
+            st.video(output_path)
+
+            # -----------------------------
+            # Download CSV
+            # -----------------------------
+
+            st.subheader(
+                "Events"
+            )
+
+            with open(
+                events_path,
+                "rb"
+            ) as file:
+
+                st.download_button(
+                    label="Download events.csv",
+                    data=file,
+                    file_name="events.csv",
+                    mime="text/csv"
+                )
