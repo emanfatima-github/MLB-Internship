@@ -1,0 +1,9 @@
+
+path: Bottle_Detection_Project/roboflow_dataset
+
+train: final_train/images
+val: valid/images
+test: test/images
+
+names:
+  0: bottle

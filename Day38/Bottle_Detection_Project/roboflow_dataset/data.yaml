@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['Bottle-Detection', 'botle', 'bottlr']
+
+roboflow:
+  workspace: eman-fatima-e1ncy
+  project: bottle-detection-7gu4t
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/eman-fatima-e1ncy/bottle-detection-7gu4t/dataset/1
