@@ -5,7 +5,7 @@ from PIL import Image
 st.title("Construction Equipment Detection")
 
 # Load trained model
-model = YOLO("Construction_Project/Experiment1/weights/best.pt")
+model = YOLO("construction-equipment-1/Construction_Project/Experiment1/weights/best.pt")
 
 # Upload image
 uploaded_file = st.file_uploader(
