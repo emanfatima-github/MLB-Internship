@@ -1,0 +1,14 @@
+Image,Observed Error,Possible Reason
+1,Helmet detected but tractor was missed,The model detected the helmet but failed to detect the construction tractor.
+2,No object detected,"Construction equipment is visible, but the model did not detect it."
+3,No object detected,"Construction equipment is visible, but the model did not detect it."
+7,No object detected,"Construction equipment is visible, but the model did not detect it."
+9,No object detected,"Construction equipment is visible, but the model did not detect it."
+10,Wrong detection,The model detected an object incorrectly.
+11,No object detected,"Construction equipment is visible, but the model did not detect it."
+12,No object detected,"Construction equipment is visible, but the model did not detect it."
+13,No object detected,"Construction equipment is visible, but the model did not detect it."
+14,No object detected,"Construction equipment is visible, but the model did not detect it."
+15,No object detected,"Construction equipment is visible, but the model did not detect it."
+16,No object detected,"Construction equipment is visible, but the model did not detect it."
+18,No object detected,"Construction equipment is visible, but the model did not detect it."

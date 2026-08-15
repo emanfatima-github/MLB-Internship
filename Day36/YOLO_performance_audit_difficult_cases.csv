@@ -1,0 +1,6 @@
+Image,Model Prediction,Correct Result,Possible Reason,Possible Improvement
+1,"Helmet detected, tractor missed",Construction tractor should have been detected,The model detected another object but failed to recognize the tractor,Add more tractor examples and improve training data
+2,No object detected,Construction equipment should have been detected,The model failed to detect the visible equipment,Add more similar training examples and improve image quality
+3,No object detected,Construction equipment should have been detected,The model failed to detect the visible equipment,Add more similar training examples and improve training
+7,No object detected,Construction equipment should have been detected,The model failed to detect the visible equipment,Use more representative training images
+10,Wrong detection,The correct construction equipment should have been detected,The model incorrectly identified an object,Add more varied examples and improve class-specific training data
