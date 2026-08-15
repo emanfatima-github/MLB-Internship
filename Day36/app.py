@@ -1,11 +1,23 @@
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
+import os
 
 st.title("Construction Equipment Detection")
 
-# Load trained model
-model = YOLO("construction-equipment-1/Construction_Project/Experiment1/weights/best.pt")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(
+    BASE_DIR,
+    "construction-equipment-1",
+    "Construction_Project",
+    "Experiment1",
+    "weights",
+    "best.pt"
+)
+
+model = YOLO(model_path)
 
 # Upload image
 uploaded_file = st.file_uploader(
