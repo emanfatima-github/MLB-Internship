@@ -4,8 +4,8 @@ from PIL import Image
 
 st.title("Construction Equipment Detection")
 
-# Load model
-model = YOLO("construction-equipment-1/Construction_Project/Experiment1/weights/best.pt")
+# Load trained model
+model = YOLO("Construction_Project/Experiment1/weights/best.pt")
 
 # Upload image
 uploaded_file = st.file_uploader(
@@ -25,7 +25,4 @@ if uploaded_file is not None:
     # Display result
     result_image = results[0].plot()
 
-    st.image(
-        result_image,
-        caption="Detection Result"
-    )
+    st.image(result_image, caption="Detection Result")
