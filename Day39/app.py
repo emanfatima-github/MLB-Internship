@@ -14,7 +14,13 @@ st.title("Bottle Detection AI")
 st.write("Upload an image or short video to detect bottles.")
 
 # Load model
-model = YOLO("best.pt")
+import os
+
+model_path = os.path.join(os.path.dirname(__file__), "best.pt")
+
+st.write("Model file exists:", os.path.exists(model_path))
+
+model = YOLO(model_path)
 
 # Confidence threshold
 confidence = st.slider(
