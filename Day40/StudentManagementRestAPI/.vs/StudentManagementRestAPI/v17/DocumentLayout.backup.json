@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Localws\\OneDrive\\Desktop\\StudentManagementRestAPI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{658B68BA-5D45-4205-AF81-7C1D4810DEDD}|StudentManagementRestAPI\\StudentManagementRestAPI.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\StudentManagementRestAPI\\StudentManagementRestAPI\\StudentManagementRestAPI.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{658B68BA-5D45-4205-AF81-7C1D4810DEDD}|StudentManagementRestAPI\\StudentManagementRestAPI.pyproj|solutionrelative:StudentManagementRestAPI\\StudentManagementRestAPI.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StudentManagementRestAPI.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\StudentManagementRestAPI\\StudentManagementRestAPI\\StudentManagementRestAPI.py",
+              "RelativeDocumentMoniker": "StudentManagementRestAPI\\StudentManagementRestAPI.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\StudentManagementRestAPI\\StudentManagementRestAPI\\StudentManagementRestAPI.py",
+              "RelativeToolTip": "StudentManagementRestAPI\\StudentManagementRestAPI.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-18T11:53:19.67Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

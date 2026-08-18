@@ -1,0 +1,41 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Localws\\OneDrive\\Desktop\\FastAPIPractice\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{986B4995-F703-4AB7-90B2-31A65D7551F9}|FastAPIPractice\\FastAPIPractice.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\FastAPIPractice\\FastAPIPractice\\FastAPIPractice.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{986B4995-F703-4AB7-90B2-31A65D7551F9}|FastAPIPractice\\FastAPIPractice.pyproj|solutionrelative:FastAPIPractice\\FastAPIPractice.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FastAPIPractice.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\FastAPIPractice\\FastAPIPractice\\FastAPIPractice.py",
+              "RelativeDocumentMoniker": "FastAPIPractice\\FastAPIPractice.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\FastAPIPractice\\FastAPIPractice\\FastAPIPractice.py",
+              "RelativeToolTip": "FastAPIPractice\\FastAPIPractice.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-18T10:19:37.92Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
