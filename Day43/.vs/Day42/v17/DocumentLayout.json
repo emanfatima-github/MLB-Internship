@@ -1,0 +1,105 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|solutionrelative:Day42\\app\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\video_processor.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|solutionrelative:Day42\\app\\services\\video_processor.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\detector.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|solutionrelative:Day42\\app\\services\\detector.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\routes\\video.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|solutionrelative:Day42\\app\\routes\\video.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\utils\\file_utils.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{33C05208-8409-4925-9C97-79269DB26601}|Day42\\Day42.pyproj|solutionrelative:Day42\\app\\utils\\file_utils.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\main.py",
+              "RelativeDocumentMoniker": "Day42\\app\\main.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\main.py*",
+              "RelativeToolTip": "Day42\\app\\main.py*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-20T11:31:48.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "file_utils.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\utils\\file_utils.py",
+              "RelativeDocumentMoniker": "Day42\\app\\utils\\file_utils.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\utils\\file_utils.py",
+              "RelativeToolTip": "Day42\\app\\utils\\file_utils.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-20T11:31:09.959Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "video_processor.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\video_processor.py",
+              "RelativeDocumentMoniker": "Day42\\app\\services\\video_processor.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\video_processor.py",
+              "RelativeToolTip": "Day42\\app\\services\\video_processor.py",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAwwHMAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-20T10:56:44.62Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "detector.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\detector.py",
+              "RelativeDocumentMoniker": "Day42\\app\\services\\detector.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\services\\detector.py",
+              "RelativeToolTip": "Day42\\app\\services\\detector.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-20T10:56:42.053Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "video.py",
+              "DocumentMoniker": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\routes\\video.py",
+              "RelativeDocumentMoniker": "Day42\\app\\routes\\video.py",
+              "ToolTip": "C:\\Users\\Localws\\OneDrive\\Desktop\\Day42\\Day42\\app\\routes\\video.py",
+              "RelativeToolTip": "Day42\\app\\routes\\video.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-08-20T10:56:36.584Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
