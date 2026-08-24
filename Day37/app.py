@@ -1,12 +1,9 @@
+import os
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
 
-
-# =========================
-# Page
-# =========================
 
 st.set_page_config(
     page_title="YOLO V1 vs V2",
@@ -14,16 +11,39 @@ st.set_page_config(
 )
 
 st.title("YOLO Model Improvement")
-st.write("Comparison of Model V1 and Model V2")
+st.write("Model V1 vs Model V2 Comparison")
 
 
 # =========================
 # Model paths
 # =========================
 
-V1_MODEL = r"C:\Users\Localws\Bottle-Detection-1\best.pt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-V2_MODEL = r"C:\Users\Localws\Bottle-Detection-1\Day37_Training\V2\weights\best.pt"
+V1_MODEL = os.path.join(
+    BASE_DIR,
+    "models",
+    "v1_best.pt"
+)
+
+V2_MODEL = os.path.join(
+    BASE_DIR,
+    "models",
+    "v2_best.pt"
+)
+
+
+# =========================
+# Check model files
+# =========================
+
+if not os.path.exists(V1_MODEL):
+    st.error(f"V1 model not found: {V1_MODEL}")
+    st.stop()
+
+if not os.path.exists(V2_MODEL):
+    st.error(f"V2 model not found: {V2_MODEL}")
+    st.stop()
 
 
 # =========================
@@ -54,82 +74,47 @@ uploaded_file = st.file_uploader(
 if uploaded_file:
 
     image = Image.open(uploaded_file).convert("RGB")
-
     image_array = np.array(image)
 
-    # Predictions
-    result_v1 = model_v1.predict(
+    v1_result = model_v1.predict(
         image_array,
         conf=0.25,
         verbose=False
     )[0]
 
-    result_v2 = model_v2.predict(
+    v2_result = model_v2.predict(
         image_array,
         conf=0.25,
         verbose=False
     )[0]
-
-
-    # =========================
-    # Original image
-    # =========================
-
-    st.subheader("Original Image")
-
-    st.image(
-        image,
-        use_container_width=True
-    )
-
-
-    # =========================
-    # V1 vs V2
-    # =========================
 
     col1, col2 = st.columns(2)
 
-
     with col1:
-
         st.subheader("Model V1")
 
-        v1_image = result_v1.plot()
-
         st.image(
-            v1_image,
+            v1_result.plot(),
             channels="BGR",
             use_container_width=True
         )
 
-        v1_count = len(result_v1.boxes)
-
-        st.write(
-            f"Detections: **{v1_count}**"
-        )
-
+        st.write(f"Detections: {len(v1_result.boxes)}")
 
     with col2:
-
         st.subheader("Model V2")
 
-        v2_image = result_v2.plot()
-
         st.image(
-            v2_image,
+            v2_result.plot(),
             channels="BGR",
             use_container_width=True
         )
 
-        v2_count = len(result_v2.boxes)
-
-        st.write(
-            f"Detections: **{v2_count}**"
-        )
+        st.write(f"Detections: {len(v2_result.boxes)}")
 
 
 # =========================
-# Model metrics
+# Metrics
 # =========================
 
 st.divider()
