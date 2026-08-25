@@ -1,0 +1,14 @@
+{"time": "2026-08-21 16:19:15", "level": "INFO", "message": "YOLO model loaded successfully"}
+{"time": "2026-08-21 16:21:26", "level": "INFO", "message": "YOLO model loaded successfully"}
+{"time": "2026-08-21 16:23:22", "level": "INFO", "message": "Request completed: GET /docs status=200 time=0.003s"}
+{"time": "2026-08-21 16:23:29", "level": "INFO", "message": "Request completed: GET /openapi.json status=200 time=0.425s"}
+{"time": "2026-08-21 16:28:22", "level": "INFO", "message": "Request completed: GET /health status=200 time=0.123s"}
+{"time": "2026-08-21 16:28:30", "level": "INFO", "message": "Request completed: GET /health status=200 time=0.004s"}
+{"time": "2026-08-21 16:33:29", "level": "INFO", "message": "Video upload received", "request_id": "req_50cb31b2bd"}
+{"time": "2026-08-21 16:33:30", "level": "INFO", "message": "Request completed: POST /video/process status=202 time=3.063s"}
+{"time": "2026-08-21 16:33:30", "level": "INFO", "message": "Job started", "request_id": "req_50cb31b2bd", "job_id": "job_58e9779510"}
+{"time": "2026-08-21 16:34:47", "level": "INFO", "message": "Request completed: GET /video/status/job_58e9779510 status=200 time=0.006s"}
+{"time": "2026-08-21 16:39:30", "level": "INFO", "message": "Request completed: GET /video/result/job_58e9779510 status=409 time=0.010s"}
+{"time": "2026-08-21 16:39:46", "level": "INFO", "message": "Request completed: GET /video/result/job_58e9779510 status=409 time=0.002s"}
+{"time": "2026-08-21 16:40:27", "level": "INFO", "message": "Request completed: GET /video/result/job_58e9779510 status=409 time=0.002s"}
+{"time": "2026-08-21 16:42:12", "level": "INFO", "message": "Processing completed in 522.78 seconds", "request_id": "req_50cb31b2bd", "job_id": "job_58e9779510"}
